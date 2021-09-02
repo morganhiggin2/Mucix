@@ -1,0 +1,92 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+namespace Mucix
+{
+    class TitleHandler
+    {
+        /// <summary>
+        /// reformats the song title so that it gets the artist and the name of the song
+        /// </summary>
+        /// <param name="title">entire title of the song</param>
+        /// <returns></returns>
+        public static TitleHandlerPackage handleTitle(string title)
+        {
+            //the song to return
+            TitleHandlerPackage song = new TitleHandlerPackage();
+
+            //if the match is a success
+            bool success = true;
+
+            //information about the match
+            Match match = null;
+
+            //get the artist
+            match = Regex.Match(title, @"[\w &.]*");
+
+            if (match.Success)
+            {
+                //get the artist of the song
+                song.artist = match.Value;
+
+                //get the next occurance, which should be the title
+                match = match.NextMatch();
+
+                if (match.Success)
+                {
+                    //get the title of the song
+                    song.title = match.NextMatch().Value;
+                }
+                else
+                {
+                    //match not found
+                    success = false;
+                }
+            }
+            else
+            {
+                //match not found
+                success = false;
+            }
+
+            //if success, return song, else, return null
+            if (success)
+            {
+                //remove space at begining of title if there is any
+                if (song.title.IndexOf(' ') == 0)
+                {
+                    song.title = song.title.Substring(1);
+                }
+
+                //if space at end of artist, remove it 
+                if (song.title.Substring(song.title.Length - 2) == " ")
+                {
+                    song.title = song.title.Substring(0, song.title.Length - 1);
+                }
+
+                return song;
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
+    public class TitleHandlerPackage
+    {
+        /// <summary>
+        /// the artist of the song
+        /// </summary>
+        public string artist;
+
+        /// <summary>
+        /// the title of the song
+        /// </summary>
+        public string title;
+    }
+}
