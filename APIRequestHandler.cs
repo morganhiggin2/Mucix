@@ -40,6 +40,20 @@ namespace Mucix
                     //execute the command
                     command.ExecuteNonQuery();
 
+                    //create playlistList table
+                    //create the command
+                    command = new SqliteCommand("CREATE TABLE IF NOT EXISTS Properties (property varchar(255), value varchar(255))", connection);
+
+                    //execute the command
+                    command.ExecuteNonQuery();
+
+                    //add blank api key
+                    //create the command
+                    command = new SqliteCommand("INSERT INTO Properties (property, value) VALUES ('" + "Google API Key" + @"', '" + " " + @"')", connection);
+
+                    //execute the command
+                    command.ExecuteNonQuery();
+
                     connection.Close();
                 }
             }
@@ -58,6 +72,9 @@ namespace Mucix
 
             //see if the playlist folders exist
             List<PlaylistHandlerPackage> playlists = getPlaylists();
+
+            //get the current api key
+            Program.GOOGLE_API_KEY = getApiKey();
 
             foreach(PlaylistHandlerPackage playlist in playlists)
             {
@@ -378,6 +395,11 @@ namespace Mucix
             }
         }
 
+        /// <summary>
+        /// add a playlist
+        /// </summary>
+        /// <param name="playlistID"></param>
+        /// <param name="playlistName"></param>
         public static void addNewPlaylist(string playlistID, string playlistName)
         {
             foreach(PlaylistHandlerPackage playlist in getPlaylists())
@@ -410,6 +432,115 @@ namespace Mucix
 
                 connection.Close();
             }
+        }
+
+        /// <summary>
+        /// get the google api key
+        /// </summary>
+        /// <returns></returns>
+        public static string getApiKey()
+        {
+            string apiKey = "";
+
+            //read the database
+            using (SqliteConnection connection = new SqliteConnection(@"DataSource=" + databasePath))
+            {
+                //open the connection
+                connection.Open();
+
+                //create the command
+                SqliteCommand command = new SqliteCommand(@"SELECT * FROM 'Properties' WHERE property == 'Google API Key'", connection);
+
+                //execute the command
+                SqliteDataReader reader = command.ExecuteReader();
+
+                //get the list of videos
+                List<PlaylistHandlerPackage> playlists = new List<PlaylistHandlerPackage>();
+
+                PlaylistHandlerPackage currentPlaylist;
+
+                while (reader.Read())
+                {
+                    apiKey = reader.GetString(1);
+                    break;
+                }
+
+                //if there are multiple api keys, something is really wrong
+                if (reader.Read())
+                {
+                    Console.WriteLine("There are more than one google api key in the database, something has gone horribly wrong...");
+                }
+
+                connection.Close();
+
+                return apiKey;
+            }
+        }
+        /// <summary>
+        /// change the api key for the youtube google api
+        /// </summary>
+        /// <param name="apiKey"></param>
+        public static void changeAPIKey(string apiKey)
+        {
+            //read the database
+            using (SqliteConnection connection = new SqliteConnection(@"DataSource=" + databasePath))
+            {
+                //open the connection
+                connection.Open();
+
+                //create the command
+                SqliteCommand command = new SqliteCommand(@"UPDATE Properties SET value = '" + apiKey + @"' WHERE property == 'Google API Key'", connection);
+
+                //execute the command
+                command.ExecuteNonQuery();
+
+                //change the current api key in the heap
+                Program.GOOGLE_API_KEY = apiKey;
+
+                connection.Close();
+            }
+        }
+
+        /// <summary>
+        /// remove a playlist
+        /// </summary>
+        /// <param name="playlistName"></param>
+        public static void removePlaylist(string playlistName)
+        {
+            foreach (PlaylistHandlerPackage playlist in getPlaylists())
+            {
+                if (playlist.playlistName == playlistName)
+                {
+                    //read the database
+                    using (SqliteConnection connection = new SqliteConnection(@"DataSource=" + databasePath))
+                    {
+                        //open the connection
+                        connection.Open();
+
+                        //create the command
+                        SqliteCommand command = new SqliteCommand(@"DELETE FROM PlaylistList WHERE title == '" + playlistName + @"'", connection);
+
+                        //execute the command
+                        command.ExecuteNonQuery();
+
+                        //create the directories for it
+                        System.IO.Directory.CreateDirectory(oldSongsPath + @"\" + playlistName);
+
+                        //create the directories for it
+                        System.IO.Directory.CreateDirectory(newSongsPath + @"\" + playlistName);
+
+                        connection.Close();
+                    }
+
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine("Playlist does not exist!");
+                }
+            }
+
+            
         }
 
         /// <summary>

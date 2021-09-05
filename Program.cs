@@ -4,7 +4,7 @@ using Microsoft.Data.Sqlite;
 
 class Program
 {
-    public const string GOOGLE_API_KEY = "AIzaSyAFoTzNBinvEqBsdN4legzysbMgWW3Iwzk";
+    public static string GOOGLE_API_KEY = "AIzaSyAFoTzNBinvEqBsdN4legzysbMgWW3Iwzk";
 
     static void Main(string[] args)
     {
@@ -23,4 +23,5 @@ class Program
 
 //use bash commands to execute the youtubedl package
 //make the api calls to get the list of links and store them in a json file 
+//UPDATE Properties SET property == 'Google Api Key' WHERE value = 'AIzaSyAFoTzNBinvEqBsdN4legzysbMgWW3Iwzk'SE
 

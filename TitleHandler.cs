@@ -123,6 +123,33 @@ namespace Mucix
 
             return newTitle;
         }
+
+        /// <summary>
+        /// compiles the args with a space in between them
+        /// </summary>
+        /// <param name="args"></param>
+        /// <param name="startIndex">start index</param>
+        /// <returns></returns>
+        public static string compileArgs(List<string> args, int startIndex = 0)
+        {
+            //the total string 
+            string totalString = "";
+
+            //add each of the args to the string
+            for(int i = 0; i < args.Count - startIndex; i++)
+            {
+                if (i == args.Count - startIndex - 1)
+                {
+                    totalString += args[i];
+                } 
+                else
+                {
+                    totalString += args[i] + " ";
+                }
+            }
+
+            return totalString;
+        }
     }
 
     public class TitleHandlerPackage
