@@ -16,6 +16,9 @@ namespace Mucix
 
         static ProgressBar progress;
 
+        /// <summary>
+        /// run this to start the program
+        /// </summary>
         public static void init()
         {
             //if the sqlite file does not exist, create it

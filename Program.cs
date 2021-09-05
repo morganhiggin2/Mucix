@@ -8,20 +8,11 @@ class Program
 
     static void Main(string[] args)
     {
-        //create the command line listener
-        //listen for incoming commands on a loop
-        //process them though the TerminalListener
-
-        //APIRequestHandler.getNewPlaylistSongs("PL5MlDErkUccCFHvVvb45pJRzxnjBOjrzp");
-
         //call init
         APIRequestHandler.init();
 
+        //start the interactive terminal interface
         TerminalListener terminal = new TerminalListener();
     }
 }
-
-//use bash commands to execute the youtubedl package
-//make the api calls to get the list of links and store them in a json file 
-//UPDATE Properties SET property == 'Google Api Key' WHERE value = 'AIzaSyAFoTzNBinvEqBsdN4legzysbMgWW3Iwzk'SE
 
