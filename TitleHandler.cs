@@ -136,7 +136,7 @@ namespace Mucix
             string totalString = "";
 
             //add each of the args to the string
-            for(int i = 0; i < args.Count - startIndex; i++)
+            for(int i = startIndex; i < args.Count - 1; i++)
             {
                 if (i == args.Count - startIndex - 1)
                 {
@@ -147,6 +147,8 @@ namespace Mucix
                     totalString += args[i] + " ";
                 }
             }
+
+            totalString += args[args.Count - 1];
 
             return totalString;
         }

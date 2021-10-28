@@ -146,6 +146,8 @@ namespace Mucix
                 //get all the urls from the playlist
                 string baseUrl = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=25&playlistId=" + playlist.playlistID + "&key=" + Program.GOOGLE_API_KEY + "&page_token=";
 
+                Console.WriteLine(baseUrl);
+
                 //go though each page to get all the results
                 //each page shows 25 results, so we will go though every page
                 bool nextPage = true;
@@ -526,11 +528,11 @@ namespace Mucix
                         //execute the command
                         command.ExecuteNonQuery();
 
-                        //create the directories for it
-                        System.IO.Directory.CreateDirectory(oldSongsPath + @"\" + playlistName);
+                        //remove the directories for it
+                        System.IO.Directory.Delete(oldSongsPath + @"\" + playlistName);
 
-                        //create the directories for it
-                        System.IO.Directory.CreateDirectory(newSongsPath + @"\" + playlistName);
+                        //remove the directories for it
+                        System.IO.Directory.Delete(newSongsPath + @"\" + playlistName);
 
                         connection.Close();
                     }
@@ -543,7 +545,11 @@ namespace Mucix
                 }
             }
 
-            
+            //if there are no playlists in the system
+            if (playlistName.Length == 0)
+            {
+                Console.WriteLine("There are no playlists in the system, try adding some!");
+            }
         }
 
         /// <summary>
@@ -562,7 +568,10 @@ namespace Mucix
         {
             foreach(Song song in songs)
             {
-                downloadYoutubeAudio(song.urlID, playlists.Find(c => c.playlistID == song.playlistID).playlistName, song.originalTitle);
+                if (downloadYoutubeAudio(song.urlID, playlists.Find(c => c.playlistID == song.playlistID).playlistName, song.originalTitle) != 0)
+                {
+                    //TODO remove song from the database of songs that are in this playlist, as we added the new ones before seeing if they got downloaded
+                }
             }
         }
 
@@ -571,17 +580,36 @@ namespace Mucix
         /// </summary>
         /// <param name="location"></param>
         /// <param name="videoID"></param>
-        private static void downloadYoutubeAudio(string urlID, string playlistName, string originalTitle)
+        private static int downloadYoutubeAudio(string urlID, string playlistName, string originalTitle)
         {
             //set the path to run the command from
             ExecuteBashCommand("cd " + youtubeDLPath);
 
             //download the song
             //ExecuteBashCommand("youtube-dl --extract-audio --audio-format \"mp3\" " + @"-o " + newSongsPath + @"\" + playlistName + @"https://www.youtube.com/watch?v=" + urlID);
-            ExecuteBashCommand("youtube-dl --extract-audio --audio-format \"mp3\" -o \"" + "%(newsong)s.%(ext)s\" " + @"https://www.youtube.com/watch?v=" + urlID);
+            try
+            {
+                ExecuteBashCommand("youtube-dl --extract-audio --audio-format \"mp3\" -o \"" + "%(newsong)s.%(ext)s\" " + @"https://www.youtube.com/watch?v=" + urlID);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error in downloading song, trying again...");
+
+                try
+                {
+                    ExecuteBashCommand("youtube-dl --extract-audio --audio-format \"mp3\" -o \"" + "%(newsong)s.%(ext)s\" " + @"https://www.youtube.com/watch?v=" + urlID);
+                }
+                catch (Exception exx)
+                {
+                    Console.WriteLine("Unable to download song " + originalTitle);
+                    return -1;
+                }
+            }
 
             //move the song to the correct location
             System.IO.File.Move(youtubeDLPath + @"\" + "NA" + @".mp3", newSongsPath + @"\" + playlistName + @"\" + originalTitle + @".mp3");
+
+            return 0;
         }
 
         /// <summary>
@@ -702,5 +730,3 @@ namespace Mucix
         }
     }
 }
-
-//handle spaces in playlist name in args
