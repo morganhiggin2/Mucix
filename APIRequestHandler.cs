@@ -146,8 +146,6 @@ namespace Mucix
                 //get all the urls from the playlist
                 string baseUrl = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=25&playlistId=" + playlist.playlistID + "&key=" + Program.GOOGLE_API_KEY + "&page_token=";
 
-                Console.WriteLine(baseUrl);
-
                 //go though each page to get all the results
                 //each page shows 25 results, so we will go though every page
                 bool nextPage = true;
@@ -303,7 +301,7 @@ namespace Mucix
         /// remnoves a video from the playlist table
         /// </summary>
         /// <param name="urlID"></param>
-        private static void removeSongFromPlaylist(string urlID)
+        public static void removeSongFromPlaylist(string urlID)
         {
             //read the database
             using (SqliteConnection connection = new SqliteConnection(@"DataSource=" + databasePath))
@@ -571,6 +569,7 @@ namespace Mucix
                 if (downloadYoutubeAudio(song.urlID, playlists.Find(c => c.playlistID == song.playlistID).playlistName, song.originalTitle) != 0)
                 {
                     //TODO remove song from the database of songs that are in this playlist, as we added the new ones before seeing if they got downloaded
+                    removeSongFromPlaylist(song.urlID);
                 }
             }
         }
@@ -590,6 +589,9 @@ namespace Mucix
             try
             {
                 ExecuteBashCommand("youtube-dl --extract-audio --audio-format \"mp3\" -o \"" + "%(newsong)s.%(ext)s\" " + @"https://www.youtube.com/watch?v=" + urlID);
+
+                //move the song to the correct location
+                System.IO.File.Move(youtubeDLPath + @"\" + "NA" + @".mp3", newSongsPath + @"\" + playlistName + @"\" + originalTitle + @".mp3");
             }
             catch (Exception ex)
             {
@@ -598,6 +600,9 @@ namespace Mucix
                 try
                 {
                     ExecuteBashCommand("youtube-dl --extract-audio --audio-format \"mp3\" -o \"" + "%(newsong)s.%(ext)s\" " + @"https://www.youtube.com/watch?v=" + urlID);
+
+                    //move the song to the correct location
+                    System.IO.File.Move(youtubeDLPath + @"\" + "NA" + @".mp3", newSongsPath + @"\" + playlistName + @"\" + originalTitle + @".mp3");
                 }
                 catch (Exception exx)
                 {
@@ -605,9 +610,6 @@ namespace Mucix
                     return -1;
                 }
             }
-
-            //move the song to the correct location
-            System.IO.File.Move(youtubeDLPath + @"\" + "NA" + @".mp3", newSongsPath + @"\" + playlistName + @"\" + originalTitle + @".mp3");
 
             return 0;
         }

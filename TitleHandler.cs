@@ -95,7 +95,6 @@ namespace Mucix
             string newFileName = title + " - " + artist + ".mp3";
 
             //change the filename
-            Console.WriteLine(pathToFile + @"\" + newFileName);
             System.IO.File.Move(pathToFile + @"\" + fileName + ".mp3", pathToFile + @"\" + newFileName);
 
             //change the properties of the mp3
