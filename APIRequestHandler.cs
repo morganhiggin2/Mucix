@@ -16,6 +16,9 @@ namespace Mucix
 
         static ProgressBar progress;
 
+        //list of the playlists
+        static private List<PlaylistHandlerPackage> playlists;
+
         /// <summary>
         /// run this to start the program
         /// </summary>
@@ -74,7 +77,7 @@ namespace Mucix
             }
 
             //see if the playlist folders exist
-            List<PlaylistHandlerPackage> playlists = getPlaylists();
+            playlists = getPlaylists();
 
             //get the current api key
             Program.GOOGLE_API_KEY = getApiKey();
@@ -97,14 +100,12 @@ namespace Mucix
 
         public static void getNewPlaylistSongs()
         {
-            //get a list of the playlists
-            List<PlaylistHandlerPackage> playlists = getPlaylists();
 
             //get tyhe progressbar ready
             progress = new ProgressBar(10);
 
             //get the list of new videos
-            List<Video> newVideos = getNewPlaylistVideos(playlists);
+            List<Video> newVideos = getNewPlaylistVideos();
 
             //convert video objects to song objects
             List<Song> newSongs = convertVideosToSongs(newVideos);
@@ -119,27 +120,26 @@ namespace Mucix
             }
 
             //move the old songs to their respecitve new songs folder
-            moveOldSongs(playlists);
+            moveOldSongs();
 
             //download the new songs
-            downloadSongs(playlists, newSongs);
+            downloadSongs(newSongs);
 
             //rename the songs
-            renameAllNewSongs(playlists, newSongs);
+            renameAllNewSongs(newSongs);
         }
 
         /// <summary>
         /// get the list of new videos from a playlist
         /// </summary>
-        /// <param name="playlistID"></param>
         /// <returns></returns>
-        private static List<Video> getNewPlaylistVideos(List<PlaylistHandlerPackage> playlists)
+        private static List<Video> getNewPlaylistVideos()
         {
             //the urls in the playlist
             List<Video> playlistVideos = new List<Video>();
 
             //get the existing urls for the playlist
-            List<string> existingUrls = getExistingSongsFromPlaylists(playlists);
+            List<string> existingUrls = getExistingSongsFromPlaylists();
 
             foreach (PlaylistHandlerPackage playlist in playlists)
             {
@@ -157,8 +157,15 @@ namespace Mucix
                     string response = getBodyOfBlanketGetRequest(baseUrl + pageToken);
 
                     //deserialize the page
-                    //Console.Write(response + "\n---------------------------------------------\n");
                     JObject pageJObject = JObject.Parse(response);
+
+                    if (pageJObject.ContainsKey("error"))
+                    {
+                        Console.WriteLine("Error getting playlist information for playlist " + playlist.playlistName);
+                        Console.WriteLine("Make sure the playlist is public and the playlistID is correct: " + playlist.playlistID);
+
+                        break;
+                    }
 
                     //get the next page token
                     if (pageJObject.ContainsKey("nextPageToken"))
@@ -265,9 +272,8 @@ namespace Mucix
         /// <summary>
         /// get list of existing songs from the database
         /// </summary>
-        /// <param name="playlistID"></param>
         /// <returns></returns>
-        private static List<string> getExistingSongsFromPlaylists(List<PlaylistHandlerPackage> playlists)
+        private static List<string> getExistingSongsFromPlaylists()
         {
             //read the database
             using (SqliteConnection connection = new SqliteConnection(@"DataSource=" + databasePath))
@@ -279,6 +285,7 @@ namespace Mucix
 
                 foreach (PlaylistHandlerPackage playlist in playlists)
                 {
+
                     //create the command
                     SqliteCommand command = new SqliteCommand(@"SELECT * FROM 'PlaylistVideos' WHERE playlist_id == '" + playlist.playlistID + @"'", connection);
 
@@ -289,9 +296,10 @@ namespace Mucix
                     {
                         urls.Add(reader.GetString(1));
                     }
-
-                    connection.Close();
                 }
+
+                //close the connection
+                connection.Close();
 
                 return urls;
             }
@@ -405,7 +413,7 @@ namespace Mucix
         /// <param name="playlistName"></param>
         public static void addNewPlaylist(string playlistID, string playlistName)
         {
-            foreach(PlaylistHandlerPackage playlist in getPlaylists())
+            foreach(PlaylistHandlerPackage playlist in playlists)
             {
                 if (playlist.playlistID == playlistID)
                 {
@@ -435,6 +443,9 @@ namespace Mucix
 
                 connection.Close();
             }
+
+            //add itto the playlist object
+            playlists.Add(new PlaylistHandlerPackage(playlistID, playlistName));
         }
 
         /// <summary>
@@ -510,7 +521,7 @@ namespace Mucix
         /// <param name="playlistName"></param>
         public static void removePlaylist(string playlistName)
         {
-            foreach (PlaylistHandlerPackage playlist in getPlaylists())
+            foreach (PlaylistHandlerPackage playlist in playlists)
             {
                 if (playlist.playlistName == playlistName)
                 {
@@ -553,6 +564,7 @@ namespace Mucix
         /// <summary>
         /// save new songs to json file
         /// </summary>
+        /// <param name="playlistID">playlist id</param>
         /// <returns></returns>
         private static List<string> saveNewSongs(string playlistID)
         {
@@ -562,7 +574,7 @@ namespace Mucix
             return null;
         }
 
-        private static void downloadSongs(List<PlaylistHandlerPackage> playlists, List<Song> songs)
+        private static void downloadSongs(List<Song> songs)
         {
             foreach(Song song in songs)
             {
@@ -617,8 +629,7 @@ namespace Mucix
         /// <summary>
         /// moves all old songs to the folder "previous"
         /// </summary>
-        /// <param name="location"></param>
-        private static void moveOldSongs(List<PlaylistHandlerPackage> playlists)
+        private static void moveOldSongs()
         {
             //directory info
             System.IO.DirectoryInfo directoryInfo;
@@ -639,9 +650,8 @@ namespace Mucix
         /// <summary>
         /// rename all the newly download songs to their proper name
         /// </summary>
-        /// <param name="playlists"></param>
         /// <param name="songs"></param>
-        public static void renameAllNewSongs(List<PlaylistHandlerPackage> playlists, List<Song> songs)
+        public static void renameAllNewSongs(List<Song> songs)
         {
             foreach(Song song in songs)
             {
@@ -696,16 +706,37 @@ namespace Mucix
         /// <returns>body of the message</returns>
         private static string getBodyOfBlanketGetRequest(string url)
         {
+            //open client
             using (var httpClient = new HttpClient())
             {
+                //create http request
                 using (var request = new HttpRequestMessage(new HttpMethod("GET"), url))
                 {
+                    //make request and get response
                     HttpResponseMessage response = httpClient.SendAsync(request).Result;
 
+                    //get the body of the response
                     string body = response.Content.ReadAsStringAsync().Result;
 
+                    //return the body of the response
                     return body;
                 }
+            }
+        }
+
+        /// <summary>
+        /// print to the terminal, the list of the playlists
+        /// </summary>
+        public static void printPlaylists()
+        {
+            //opening line
+            Console.WriteLine("Playlists: ");
+
+            //for each playlist
+            foreach (PlaylistHandlerPackage playlist in playlists)
+            {
+                //print playlist information
+                Console.WriteLine(playlist.playlistName + " : " + playlist.playlistID);
             }
         }
     }

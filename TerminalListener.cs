@@ -79,6 +79,7 @@ namespace Mucix
                             Console.WriteLine("exit                                       - exit the program");
                             Console.WriteLine("run                                        - runs the main program");
                             Console.WriteLine("add playlist {playlist_id} {playlist_name} - adds a playlist");
+                            Console.WriteLine("list playlists                             - list all playlists");
                             Console.WriteLine("remove playlist {playlist_name}            - removes a playlist");
                             Console.WriteLine("update key {google_api_key}                - update the google api key");
 
@@ -206,6 +207,29 @@ namespace Mucix
                             else
                             {
                                 Console.WriteLine("Have to specify what to update");
+                            }
+
+                            break;
+                        }
+                    case ("list"): 
+                        {
+                            if (args.Count >= 2)
+                            {
+                                switch (args[1])
+                                {
+                                    case ("playlists"):
+                                        {
+                                            APIRequestHandler.printPlaylists();
+
+                                            break;
+                                        }
+                                    default:
+                                        {
+                                            Console.WriteLine("Not a Valid Command");
+
+                                            break;
+                                        }
+                                }
                             }
 
                             break;
