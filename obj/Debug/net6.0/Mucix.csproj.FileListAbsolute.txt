@@ -26,7 +26,6 @@ C:\Users\morga\Documents\Projects\Mucix\Mucix\obj\Debug\net6.0\Mucix.csproj.Asse
 C:\Users\morga\Documents\Projects\Mucix\Mucix\obj\Debug\net6.0\Mucix.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\morga\Documents\Projects\Mucix\Mucix\obj\Debug\net6.0\Mucix.AssemblyInfoInputs.cache
 C:\Users\morga\Documents\Projects\Mucix\Mucix\obj\Debug\net6.0\Mucix.AssemblyInfo.cs
-C:\Users\morga\Documents\Projects\Mucix\Mucix\obj\Debug\net6.0\Mucix.ImplicitNamespaceImports.cs
 C:\Users\morga\Documents\Projects\Mucix\Mucix\obj\Debug\net6.0\Mucix.csproj.CoreCompileInputs.cache
 C:\Users\morga\Documents\Projects\Mucix\Mucix\obj\Debug\net6.0\Mucix.dll
 C:\Users\morga\Documents\Projects\Mucix\Mucix\obj\Debug\net6.0\ref\Mucix.dll
@@ -34,3 +33,4 @@ C:\Users\morga\Documents\Projects\Mucix\Mucix\obj\Debug\net6.0\Mucix.pdb
 C:\Users\morga\Documents\Projects\Mucix\Mucix\obj\Debug\net6.0\Mucix.genruntimeconfig.cache
 C:\Users\morga\Documents\Projects\Mucix\Mucix\bin\Debug\net6.0\Newtonsoft.Json.dll
 C:\Users\morga\Documents\Projects\Mucix\Mucix\bin\Debug\net6.0\taglib-sharp.dll
+C:\Users\morga\Documents\Projects\Mucix\Mucix\obj\Debug\net6.0\Mucix.csproj.CopyComplete

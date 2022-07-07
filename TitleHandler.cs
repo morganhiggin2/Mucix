@@ -24,6 +24,7 @@ namespace Mucix
 
             //information about the match
             Match match = null;
+            string nextMatchValue = "";
 
             //get the artist
             match = Regex.Match(title, @"[\w &.]*");
@@ -36,10 +37,12 @@ namespace Mucix
                 //get the next occurance, which should be the title
                 match = match.NextMatch();
 
-                if (match.Success)
+                nextMatchValue = match.NextMatch().Value;
+
+                if (match.Success && nextMatchValue != "")
                 {
                     //get the title of the song
-                    song.title = match.NextMatch().Value;
+                    song.title = nextMatchValue;
                 }
                 else
                 {
@@ -116,6 +119,7 @@ namespace Mucix
             //newTitle.Replace("&", "");
             newTitle = newTitle.Replace("@", "");
             newTitle = newTitle.Replace("\\", "");
+            newTitle = newTitle.Replace("\"", "");
             newTitle = newTitle.Replace("/", "");
             newTitle = newTitle.Replace("   ", " ");
             newTitle = newTitle.Replace("  ", " ");

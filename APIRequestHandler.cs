@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using Mucix.Models;
 using System.Globalization;
+using System.IO;
+using System;
+using System.Linq;
+using System.Net.Http;
 
 namespace Mucix
 {
@@ -576,13 +580,24 @@ namespace Mucix
 
         private static void downloadSongs(List<Song> songs)
         {
+            List<Song> removeSongs = new List<Song>();
+
             foreach(Song song in songs)
             {
                 if (downloadYoutubeAudio(song.urlID, playlists.Find(c => c.playlistID == song.playlistID).playlistName, song.originalTitle) != 0)
                 {
                     //TODO remove song from the database of songs that are in this playlist, as we added the new ones before seeing if they got downloaded
                     removeSongFromPlaylist(song.urlID);
+
+                    //remove song as it cannot be downloaded
+                    removeSongs.Add(song);
                 }
+            }
+
+            //remove songs
+            foreach(Song song in removeSongs)
+            {
+                songs.Remove(song);
             }
         }
 
@@ -637,6 +652,8 @@ namespace Mucix
             //for each playlist
             foreach(PlaylistHandlerPackage playlist in playlists)
             {
+                Console.WriteLine(newSongsPath + @"\" + playlist.playlistName);
+
                 //get directory info of the old songs playlist path
                 directoryInfo = new DirectoryInfo(newSongsPath + @"\" + playlist.playlistName);
 
